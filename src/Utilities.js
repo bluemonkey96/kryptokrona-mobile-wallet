@@ -24,22 +24,27 @@ import { addFee, toAtomic } from './Fee';
 
 import Identicon from 'identicon.js';
 
-const intToRGB = (int) => {
+const INT_TO_RGB_ERROR_MESSAGE = 'intToRGB requires an integer between 0 and 16777215 inclusive.';
 
-    if (typeof int !== 'number') throw new Error(errorMessage);
-    if (Math.floor(int) !== int) throw new Error(errorMessage);
-    if (int < 0 || int > 16777215) throw new Error(errorMessage);
-  
-    var red = int >> 16;
-    var green = int - (red << 16) >> 8;
-    var blue = int - (red << 16) - (green << 8);
-  
-    return {
-      red: red,
-      green: green,
-      blue: blue
+const intToRGB = (int) => {
+    if (!Number.isInteger(int)) {
+        throw new Error(INT_TO_RGB_ERROR_MESSAGE);
     }
-  }
+
+    if (int < 0 || int > 0xFFFFFF) {
+        throw new Error(INT_TO_RGB_ERROR_MESSAGE);
+    }
+
+    const red = (int >> 16) & 0xFF;
+    const green = (int >> 8) & 0xFF;
+    const blue = int & 0xFF;
+
+    return {
+        red,
+        green,
+        blue,
+    };
+};
 
 export function delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -338,13 +343,22 @@ export function validAmount(amount, unlockedBalance) {
 }
 
 const hashCode = (str) => {
-    let hash = Math.abs(str.hashCode())*0.007812499538;
-return Math.floor(hash);
+    const stringToHash = String(str);
+    let hash = 0;
 
-}
- export function get_avatar(hash) {
+    for (let i = 0; i < stringToHash.length; i++) {
+        hash = ((hash << 5) - hash) + stringToHash.charCodeAt(i);
+        hash |= 0;
+    }
+
+    const normalizedHash = Math.floor(Math.abs(hash) * 0.007812499538);
+
+    return Math.min(normalizedHash, 0xFFFFFF);
+};
+
+export function get_avatar(hash) {
     // Displays a fixed identicon until user adds new contact address in the input field
-    if (hash.length < 15) {
+    if (!hash || hash.length < 15) {
       hash = 'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY';
     }
     // Get custom color scheme based on address
@@ -361,4 +375,4 @@ return Math.floor(hash);
 
     // create a base64 encoded SVG
     return 'data:image/png;base64,' + new Identicon(hash, options).toString();
-  }
+}
