@@ -45,46 +45,7 @@ import {
     validAmount, get_avatar
 } from './Utilities';
 
-import Identicon from 'identicon.js';
-
 import CustomIcon from './CustomIcon';
-
-const intToRGB = (int) => {
-
-  if (typeof int !== 'number') throw new Error(errorMessage);
-  if (Math.floor(int) !== int) throw new Error(errorMessage);
-  if (int < 0 || int > 16777215) throw new Error(errorMessage);
-
-  var red = int >> 16;
-  var green = int - (red << 16) >> 8;
-  var blue = int - (red << 16) - (green << 8);
-
-  return {
-    red: red,
-    green: green,
-    blue: blue
-  }
-}
-
-
-String.prototype.hashCode = function() {
-    var hash = 0;
-    if (this.length == 0) {
-        return hash;
-    }
-    for (var i = 0; i < this.length; i++) {
-        var char = this.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
-}
-
-const hashCode = (str) => {
-		let hash = Math.abs(str.hashCode())*0.007812499538;
-    return Math.floor(hash);
-
-}
 
 export class QrScannerScreen extends React.Component {
     constructor(props) {
@@ -400,28 +361,6 @@ class AddressBook extends React.Component {
     }
 
     render() {
-
-                  function get_avatar(hash) {
-                    // Displays a fixed identicon until user adds new contact address in the input field
-                    if (hash.length < 15) {
-                      hash = 'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY';
-                    }
-                    // Get custom color scheme based on address
-                    let rgb = intToRGB(hashCode(hash));
-
-                    // Options for avatar
-                    var options = {
-                          foreground: [rgb.red, rgb.green, rgb.blue, 255],               // rgba black
-                          background: [parseInt(rgb.red/10), parseInt(rgb.green/10), parseInt(rgb.blue/10), 0],         // rgba white
-                          margin: 0.2,                              // 20% margin
-                          size: 50,                                // 420px square
-                          format: 'png'                           // use SVG instead of PNG
-                        };
-
-                    // create a base64 encoded SVG
-                    return 'data:image/png;base64,' + new Identicon(hash, options).toString();
-                  }
-
 
         return(
             <List style={{
